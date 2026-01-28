@@ -10,7 +10,7 @@
   <body>
     <a-scene>
       <!-- Caméra et contrôles VR -->
-      <a-entity id="camera-rig" position="0 1.6 0">
+      <a-entity id="camera-rig" position="0 0.3 0">
         <a-camera look-controls wasd-controls="acceleration: 20"></a-camera>
 
         <!-- Main gauche VR -->
@@ -53,87 +53,90 @@
         <a-entity
           id="airplane"
           gltf-model="./models/Airplane.glb"
-          position="0 0.5 -1.5"
-          scale="0.5 0.5 0.5"
+          position="0 0.5 -3"
+          scale="1 1 1"
           class="clickable"
         >
         </a-entity>
 
-        <!-- Lune dans le ciel avec zone de surface -->
-        <a-entity id="moon" position="8 15 -10">
-          <!-- Modèle de la Lune -->
-          <a-entity gltf-model="./models/Moon.glb" scale="2 2 2"></a-entity>
+        <!-- Lune dans le ciel -->
+        <a-entity
+          id="moon"
+          gltf-model="./models/Moon.glb"
+          position="8 15 -10"
+          scale="2 2 2"
+        ></a-entity>
+      </a-entity>
 
-          <!-- Zone de surface plate sur la Lune (invisible) -->
-          <a-entity id="moon-surface" position="0 2 0" visible="false">
-            <!-- Sol plat pour marcher -->
-            <a-plane
-              position="0 0 0"
-              rotation="-90 0 0"
-              width="4"
-              height="4"
-              color="#A0A0A0"
-              visible="false"
-            ></a-plane>
+      <!-- MONDE 2: SURFACE DE LA LUNE -->
+      <a-entity id="moon-world" position="8 15 -10" visible="false">
+        <!-- Sphère lunaire (surface) -->
+        <a-sphere
+          position="0 0 0"
+          radius="5"
+          color="#A0A0A0"
+          segments-height="18"
+          segments-width="36"
+        ></a-sphere>
 
-            <!-- Rose sur la Lune -->
-            <a-entity
-              id="rose"
-              gltf-model="./models/Rose.glb"
-              position="0 0.5 -1.5"
-              scale="0.8 0.8 0.8"
-              class="clickable"
-              animation="property: position; to: 0 0.7 -1.5; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"
-            >
-            </a-entity>
-          </a-entity>
+        <!-- Lumières sur la Lune -->
+        <a-light
+          type="point"
+          color="#FFF"
+          intensity="2"
+          position="0 8 0"
+          distance="25"
+        ></a-light>
+        <a-light type="ambient" color="#8899BB" intensity="1"></a-light>
+
+        <!-- Rose collée sur la surface de la sphère -->
+        <a-entity
+          id="rose"
+          gltf-model="./models/Rose.glb"
+          position="0 5.3 0"
+          scale="0.8 0.8 0.8"
+          class="clickable"
+        >
         </a-entity>
+      </a-entity>
       </a-entity>
 
       <!-- MONDE 3: CHAMP DE FLEURS -->
-      <a-entity id="flower-world" visible="false">
-        <!-- Sol herbeux -->
-        <a-plane
+      <a-entity id="flower-world" position="0 0 0" visible="false">
+        <!-- Sphère herbeusée -->
+        <a-sphere
           position="0 0 0"
-          rotation="-90 0 0"
-          width="4"
-          height="4"
+          radius="15"
           color="#7CFC00"
-        ></a-plane>
+          segments-height="24"
+          segments-width="48"
+        ></a-sphere>
 
-        <!-- Quelques fleurs décoratives -->
-        <a-cylinder
-          position="-1.5 0.05 -1"
-          radius="0.1"
-          height="0.1"
-          color="#FF69B4"
-        ></a-cylinder>
-        <a-cylinder
-          position="1.2 0.05 -1.5"
-          radius="0.1"
-          height="0.1"
-          color="#FFD700"
-        ></a-cylinder>
-        <a-cylinder
-          position="-1 0.05 1.2"
-          radius="0.1"
-          height="0.1"
-          color="#FF1493"
-        ></a-cylinder>
-        <a-cylinder
-          position="1.5 0.05 0.8"
-          radius="0.1"
-          height="0.1"
-          color="#FF6347"
-        ></a-cylinder>
+        <!-- Lumières sur la sphère -->
+        <a-light
+          type="point"
+          color="#FFF"
+          intensity="2"
+          position="0 20 0"
+          distance="40"
+        ></a-light>
+        <a-light type="ambient" color="#FFEB99" intensity="1.2"></a-light>
 
-        <!-- Renard -->
+        <!-- Renard collé à la surface -->
         <a-entity
           id="fox"
           gltf-model="./models/Foxv2.glb"
-          position="0 0 -1.5"
-          scale="0.6 0.6 0.6"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear"
+          position="0 15.5 0"
+          scale="0.8 0.8 0.8"
+        >
+        </a-entity>
+
+        <!-- Soleil face à la sphère -->
+        <a-entity
+          gltf-model="./models/Sun.glb"
+          position="0 15 -30"
+          scale="0.5 0.5 0.5"
+          animation="property: rotation; to: 0 0 360; loop: true; dur: 20000; easing: linear"
         >
         </a-entity>
       </a-entity>
