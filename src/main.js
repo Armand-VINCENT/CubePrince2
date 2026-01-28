@@ -161,6 +161,45 @@ function startSunsetAnimation() {
       sunsetComplete = true;
       console.log("Coucher de soleil terminé - Golden hour atteinte");
       dome.setAttribute("color", endSkyColor);
+
+      // Jouer le son SFX_Activation
+      const activationSound = new Audio("/SFX_Activation.mp3");
+      activationSound.play();
+
+      // Afficher et animer le texte poétique
+      const roseText = document.querySelector("#rose-text");
+      if (roseText) {
+        // Apparition progressive
+        let textOpacity = 0;
+        const fadeInDuration = 2000;
+        const fadeInStart = Date.now();
+
+        const fadeInInterval = setInterval(() => {
+          const elapsed = Date.now() - fadeInStart;
+          textOpacity = Math.min(elapsed / fadeInDuration, 1);
+          roseText.setAttribute("opacity", textOpacity);
+
+          if (textOpacity >= 1) {
+            clearInterval(fadeInInterval);
+
+            // Disparition après 3 secondes
+            setTimeout(() => {
+              const fadeOutDuration = 2000;
+              const fadeOutStart = Date.now();
+
+              const fadeOutInterval = setInterval(() => {
+                const elapsed = Date.now() - fadeOutStart;
+                const progress = Math.min(elapsed / fadeOutDuration, 1);
+                roseText.setAttribute("opacity", 1 - progress);
+
+                if (progress >= 1) {
+                  clearInterval(fadeOutInterval);
+                }
+              }, 16);
+            }, 3000);
+          }
+        }, 16);
+      }
     }
   }, 16); // ~60fps pour transition très fluide
 }
