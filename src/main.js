@@ -312,7 +312,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (airplaneClicked) return; // Éviter les clics multiples
         airplaneClicked = true;
         console.log("Avion cliqué - Téléportation sur la Lune");
-        
+
         // Arrêter le cycle automatique jour/nuit
         if (dayNightInterval) {
           clearInterval(dayNightInterval);
