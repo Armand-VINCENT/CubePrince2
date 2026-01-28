@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cubeprince</title>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Caméra et contrôles VR -->
+      <a-entity id="camera-rig" position="0 1.6 0">
+        <a-camera look-controls wasd-controls="acceleration: 20"></a-camera>
+
+        <!-- Main gauche VR -->
+        <a-entity
+          id="left-hand"
+          hand-controls="hand: left"
+          laser-controls="hand: left"
+          raycaster="objects: .clickable; far: 10"
+        ></a-entity>
+
+        <!-- Main droite VR -->
+        <a-entity
+          id="right-hand"
+          hand-controls="hand: right"
+          laser-controls="hand: right"
+          raycaster="objects: .clickable; far: 10"
+        ></a-entity>
+      </a-entity>
+
+      <!-- Dôme pour l'ambiance lumineuse -->
+      <a-sky id="dome" color="#87CEEB" radius="30"></a-sky>
+
+      <!-- Lumières -->
+      <a-entity
+        id="sun"
+        light="type: directional; color: #FFF; intensity: 1"
+        position="5 10 5"
+      ></a-entity>
+      <a-light type="ambient" color="#445" intensity="0.5"></a-light>
+
+      <!-- MONDE 1: DÉSERT -->
+      <a-entity id="desert-world" position="-1.78312 0 0">
+        <!-- Sol désert (modèle 3D) -->
+        <a-entity
+          gltf-model="./models/Desert.glb"
+          scale="0.25 0.25 0.25"
+        ></a-entity>
+
+        <!-- Modèle avion cliquable -->
+        <a-entity
+          id="airplane"
+          gltf-model="./models/Airplane.glb"
+          position="0 0.5 -1.5"
+          scale="0.5 0.5 0.5"
+          class="clickable"
+        >
+        </a-entity>
+
+        <!-- Lune dans le ciel avec zone de surface -->
+        <a-entity id="moon" position="8 15 -10">
+          <!-- Modèle de la Lune -->
+          <a-entity gltf-model="./models/Moon.glb" scale="2 2 2"></a-entity>
+
+          <!-- Zone de surface plate sur la Lune (invisible) -->
+          <a-entity id="moon-surface" position="0 2 0" visible="false">
+            <!-- Sol plat pour marcher -->
+            <a-plane
+              position="0 0 0"
+              rotation="-90 0 0"
+              width="4"
+              height="4"
+              color="#A0A0A0"
+              visible="false"
+            ></a-plane>
+
+            <!-- Rose sur la Lune -->
+            <a-entity
+              id="rose"
+              gltf-model="./models/Rose.glb"
+              position="0 0.5 -1.5"
+              scale="0.8 0.8 0.8"
+              class="clickable"
+              animation="property: position; to: 0 0.7 -1.5; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"
+            >
+            </a-entity>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+
+      <!-- MONDE 3: CHAMP DE FLEURS -->
+      <a-entity id="flower-world" visible="false">
+        <!-- Sol herbeux -->
+        <a-plane
+          position="0 0 0"
+          rotation="-90 0 0"
+          width="4"
+          height="4"
+          color="#7CFC00"
+        ></a-plane>
+
+        <!-- Quelques fleurs décoratives -->
+        <a-cylinder
+          position="-1.5 0.05 -1"
+          radius="0.1"
+          height="0.1"
+          color="#FF69B4"
+        ></a-cylinder>
+        <a-cylinder
+          position="1.2 0.05 -1.5"
+          radius="0.1"
+          height="0.1"
+          color="#FFD700"
+        ></a-cylinder>
+        <a-cylinder
+          position="-1 0.05 1.2"
+          radius="0.1"
+          height="0.1"
+          color="#FF1493"
+        ></a-cylinder>
+        <a-cylinder
+          position="1.5 0.05 0.8"
+          radius="0.1"
+          height="0.1"
+          color="#FF6347"
+        ></a-cylinder>
+
+        <!-- Renard -->
+        <a-entity
+          id="fox"
+          gltf-model="./models/Foxv2.glb"
+          position="0 0 -1.5"
+          scale="0.6 0.6 0.6"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear"
+        >
+        </a-entity>
+      </a-entity>
+
+      <!-- Curseur pour l'interaction -->
+      <a-entity
+        cursor="rayOrigin: mouse"
+        raycaster="objects: .clickable"
+      ></a-entity>
+    </a-scene>
+  </body>
+</html>
