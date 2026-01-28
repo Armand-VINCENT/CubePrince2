@@ -170,8 +170,27 @@
         </a-entity>
 
         <!-- Soleil face à la sphère. -->
-       <a-entity gltf-model="./models/Sun.glb" position="0.19208 4.36791 -14.48412" scale="0.1 0.1 0.1" rotation="0 90 0">
-        </a-entity>
+       <a-entity id="sun-entity" position="0.19208 4.36791 -14.48412">
+         <a-entity 
+           gltf-model="./models/Sun.glb" 
+           scale="0.1 0.1 0.1" 
+           rotation="0 90 0"
+         ></a-entity>
+         
+         <!-- Lumière émissive du soleil -->
+         <a-light 
+           type="point" 
+           color="#FFA500" 
+           intensity="3" 
+           distance="15"
+         ></a-light>
+         
+         <!-- Sphère lumineuse autour du soleil pour effet de glow -->
+         <a-sphere 
+           radius="0.15" 
+           material="shader: flat; color: #FFD700; opacity: 0.4; transparent: true"
+         ></a-sphere>
+       </a-entity>
       </a-entity>
 
       <!-- Curseur pour l'interaction -->
