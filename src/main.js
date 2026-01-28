@@ -151,7 +151,7 @@ function toggleDayNight() {
 }
 
 // Cycle automatique jour/nuit toutes les 30 secondes
-setInterval(toggleDayNight, 30000);
+let dayNightInterval = setInterval(toggleDayNight, 30000);
 
 // Animation du coucher de soleil (golden hour)
 let sunsetComplete = false;
@@ -305,10 +305,19 @@ window.addEventListener("DOMContentLoaded", () => {
     const cameraRig = document.querySelector("#camera-rig");
     const desertWorld = document.querySelector("#desert-world");
     const moonWorld = document.querySelector("#moon-world");
+    let airplaneClicked = false;
 
     if (airplane) {
       airplane.addEventListener("click", () => {
+        if (airplaneClicked) return; // Éviter les clics multiples
+        airplaneClicked = true;
         console.log("Avion cliqué - Téléportation sur la Lune");
+        
+        // Arrêter le cycle automatique jour/nuit
+        if (dayNightInterval) {
+          clearInterval(dayNightInterval);
+          dayNightInterval = null;
+        }
 
         // Cacher le désert
         desertWorld.setAttribute("visible", false);
@@ -329,10 +338,8 @@ window.addEventListener("DOMContentLoaded", () => {
         }
 
         // Lancer l'animation du coucher de soleil (golden hour)
+        // Le dôme sera géré par l'animation golden hour
         startSunsetAnimation();
-
-        // Changer l'ambiance
-        dome.setAttribute("color", "#1C1C3C");
       });
     }
 
