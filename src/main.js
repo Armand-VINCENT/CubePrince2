@@ -1,6 +1,52 @@
 import "aframe";
 import "./style.css";
 
+// Gestion des sons
+let windSound = null;
+let mainOstSound = null;
+
+// Écran de démarrage et initialisation du son
+window.addEventListener("DOMContentLoaded", () => {
+  const startButton = document.getElementById("start-button");
+  const startScreen = document.getElementById("start-screen");
+  const mainScene = document.getElementById("main-scene");
+
+  startButton.addEventListener("click", () => {
+    // Lancer le son du vent
+    windSound = new Audio("./WindSFX.m4a");
+    windSound.loop = true;
+    windSound.volume = 0.5;
+    windSound.play();
+
+    // Précharger le son principal
+    mainOstSound = new Audio("./MainOst.m4a");
+    mainOstSound.loop = true;
+    mainOstSound.volume = 0.6;
+
+    // Masquer l'écran de démarrage et afficher la scène
+    startScreen.style.display = "none";
+    mainScene.style.display = "block";
+
+    // Corriger les trous dans les modèles GLB (rendu double-face)
+    setTimeout(() => {
+      const scene = document.querySelector("a-scene");
+      if (scene && scene.object3D) {
+        scene.object3D.traverse((node) => {
+          if (node.isMesh) {
+            if (Array.isArray(node.material)) {
+              node.material.forEach((mat) => {
+                mat.side = THREE.DoubleSide;
+              });
+            } else if (node.material) {
+              node.material.side = THREE.DoubleSide;
+            }
+          }
+        });
+      }
+    }, 2000);
+  });
+});
+
 // Fonction utilitaire pour interpoler entre deux couleurs hexadécimales
 function interpolateColor(color1, color2, factor) {
   const c1 = parseInt(color1.slice(1), 16);
@@ -114,9 +160,13 @@ function startSunsetAnimation() {
   const sun = document.querySelector("#sun");
   const dome = document.querySelector("#dome");
 
-  // Couleurs de départ et d'arrivée
+  // Couleurs de départ et d'arrivée - transition douce nuit vers aube
   const startSkyColor = "#1C1C3C"; // Bleu nuit
-  const midSkyColor = "#6B4C9A"; // Violet intermédiaire
+  const color1 = "#2A3A52"; // Bleu gris nuit
+  const color2 = "#4A5A6A"; // Gris bleué
+  const color3 = "#8A7A6A"; // Gris chaud
+  const color4 = "#C8A882"; // Beige orangé
+  const color5 = "#FFB870"; // Jaune doux
   const endSkyColor = "#FF8C42"; // Orange doré (golden hour)
   const startSunIntensity = 1;
   const endSunIntensity = 0.7;
@@ -140,17 +190,29 @@ function startSunsetAnimation() {
       startSunIntensity + (endSunIntensity - startSunIntensity) * eased;
     sun.setAttribute("light", "intensity", currentIntensity);
 
-    // Interpolation fluide de la couleur du ciel (3 étapes)
+    // Interpolation fluide de la couleur du ciel - transition nuit vers aube dorée
     let currentColor;
-    if (eased < 0.5) {
-      // Première moitié : bleu nuit -> violet
-      currentColor = interpolateColor(startSkyColor, midSkyColor, eased * 2);
+    if (eased < 0.17) {
+      // Bleu nuit -> Bleu gris
+      currentColor = interpolateColor(startSkyColor, color1, eased / 0.17);
+    } else if (eased < 0.33) {
+      // Bleu gris -> Gris bleué
+      currentColor = interpolateColor(color1, color2, (eased - 0.17) / 0.16);
+    } else if (eased < 0.5) {
+      // Gris bleué -> Gris chaud
+      currentColor = interpolateColor(color2, color3, (eased - 0.33) / 0.17);
+    } else if (eased < 0.67) {
+      // Gris chaud -> Beige orangé
+      currentColor = interpolateColor(color3, color4, (eased - 0.5) / 0.17);
+    } else if (eased < 0.83) {
+      // Beige orangé -> Jaune doux
+      currentColor = interpolateColor(color4, color5, (eased - 0.67) / 0.16);
     } else {
-      // Deuxième moitié : violet -> orange doré
+      // Jaune doux -> Orange doré
       currentColor = interpolateColor(
-        midSkyColor,
+        color5,
         endSkyColor,
-        (eased - 0.5) * 2,
+        (eased - 0.83) / 0.17,
       );
     }
 
@@ -163,7 +225,7 @@ function startSunsetAnimation() {
       dome.setAttribute("color", endSkyColor);
 
       // Jouer le son SFX_Activation
-      const activationSound = new Audio("/SFX_Activation.mp3");
+      const activationSound = new Audio("./SFX_Activation.mp3");
       activationSound.play();
 
       // Afficher et animer le texte poétique
@@ -256,6 +318,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // Téléporter la caméra sur la Lune (sur le dessus de la sphère)
         cameraRig.setAttribute("position", "8 20.3 -10");
+
+        // Arrêter le son du vent et lancer la musique principale
+        if (windSound) {
+          windSound.pause();
+          windSound.currentTime = 0;
+        }
+        if (mainOstSound) {
+          mainOstSound.play();
+        }
 
         // Lancer l'animation du coucher de soleil (golden hour)
         startSunsetAnimation();

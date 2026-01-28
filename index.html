@@ -8,7 +8,61 @@
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <a-scene>
+    <!-- Écran de démarrage pour activer le son -->
+    <div id="start-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%); display: flex; align-items: center; justify-content: center; z-index: 9999; font-family: Arial, sans-serif; overflow: hidden;">
+      <!-- Étoiles de fond -->
+      <div id="stars" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+      
+      <!-- Lune -->
+      <div style="position: absolute; top: 10%; right: 15%; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #F4F4F4, #B0B0B0); box-shadow: 0 0 60px rgba(255,255,255,0.3), inset -20px -20px 40px rgba(0,0,0,0.2);">
+        <!-- Cratères lunaires -->
+        <div style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.15); top: 40%; left: 25%;"></div>
+        <div style="position: absolute; width: 15px; height: 15px; border-radius: 50%; background: rgba(0,0,0,0.1); top: 60%; left: 50%;"></div>
+        <div style="position: absolute; width: 25px; height: 25px; border-radius: 50%; background: rgba(0,0,0,0.12); top: 30%; left: 60%;"></div>
+        <div style="position: absolute; width: 12px; height: 12px; border-radius: 50%; background: rgba(0,0,0,0.08); top: 70%; left: 35%;"></div>
+      </div>
+      
+      <div style="text-align: center; color: white; position: relative; z-index: 1;">
+        <h1 style="font-size: 3em; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,255,255,0.5);">Le Petit Prince</h1>
+        <p style="font-size: 1.2em; margin-bottom: 40px; text-shadow: 0 0 10px rgba(255,255,255,0.3);">Une expérience immersive</p>
+        <button id="start-button" style="padding: 20px 40px; font-size: 1.5em; background: rgba(255,255,255,0.9); color: #1B2735; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          Commencer l'expérience
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Générer les étoiles
+      const starsContainer = document.getElementById('stars');
+      for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        const size = Math.random() * 2 + 1;
+        star.style.cssText = `
+          position: absolute;
+          width: ${size}px;
+          height: ${size}px;
+          background: white;
+          border-radius: 50%;
+          top: ${Math.random() * 100}%;
+          left: ${Math.random() * 100}%;
+          opacity: ${Math.random() * 0.7 + 0.3};
+          animation: twinkle ${Math.random() * 3 + 2}s infinite alternate;
+        `;
+        starsContainer.appendChild(star);
+      }
+      
+      // Animation de scintillement
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes twinkle {
+          from { opacity: 0.3; }
+          to { opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+
+    <a-scene id="main-scene" style="display: none;">
       <!-- Caméra et contrôles VR -->
       <a-entity id="camera-rig" position="0 0.3 0">
         <a-camera look-controls wasd-controls="acceleration: 20"></a-camera>
@@ -18,7 +72,7 @@
           id="left-hand"
           hand-controls="hand: left"
           laser-controls="hand: left"
-          raycaster="objects: .clickable; far: 10"
+          raycaster="objects: .clickable; far: 10; direction: 0 0 -1"
         ></a-entity>
 
         <!-- Main droite VR -->
@@ -26,7 +80,7 @@
           id="right-hand"
           hand-controls="hand: right"
           laser-controls="hand: right"
-          raycaster="objects: .clickable; far: 10"
+          raycaster="objects: .clickable; far: 10; direction: 0 0 -1"
         ></a-entity>
       </a-entity>
 
@@ -110,37 +164,56 @@
           opacity="0"
         ></a-text>
 
-        <!-- Étoiles scintillantes -->
-        <a-sphere position="5 8 -5" radius="0.05" color="#FFF" opacity="0.9"
-          animation="property: opacity; from: 0.3; to: 1; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="-6 10 3" radius="0.04" color="#FFF" opacity="0.8"
-          animation="property: opacity; from: 0.4; to: 1; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="3 12 -8" radius="0.06" color="#FFF" opacity="0.9"
-          animation="property: opacity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 2500; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="-4 6 -6" radius="0.03" color="#FFF" opacity="0.7"
-          animation="property: opacity; from: 0.3; to: 0.9; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="7 9 2" radius="0.05" color="#FFF" opacity="0.85"
-          animation="property: opacity; from: 0.4; to: 1; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="-5 11 -3" radius="0.04" color="#FFF" opacity="0.8"
-          animation="property: opacity; from: 0.35; to: 0.95; dir: alternate; loop: true; dur: 1900; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="4 7 -10" radius="0.05" color="#FFF" opacity="0.9"
-          animation="property: opacity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 2100; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="-7 8 4" radius="0.04" color="#FFF" opacity="0.75"
-          animation="property: opacity; from: 0.3; to: 0.9; dir: alternate; loop: true; dur: 1700; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="6 13 -4" radius="0.06" color="#FFF" opacity="0.9"
-          animation="property: opacity; from: 0.45; to: 1; dir: alternate; loop: true; dur: 2400; easing: easeInOutSine">
-        </a-sphere>
-        <a-sphere position="-3 9 5" radius="0.03" color="#FFF" opacity="0.7"
-          animation="property: opacity; from: 0.35; to: 0.85; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
-        </a-sphere>
+        <!-- Étoiles scintillantes (beaucoup plus d'étoiles pour un ciel étoilé magnifique) -->
+        <a-entity position="5 8 -5"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 1; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.5" distance="3" animation="property: light.intensity; from: 0.2; to: 0.8; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-6 10 3"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.4; to: 1; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.4" distance="2.5" animation="property: light.intensity; from: 0.15; to: 0.7; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="3 12 -8"><a-sphere radius="0.04" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 2500; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.6" distance="3.5" animation="property: light.intensity; from: 0.25; to: 0.9; dir: alternate; loop: true; dur: 2500; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-4 6 -6"><a-sphere radius="0.02" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 0.9; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.3" distance="2" animation="property: light.intensity; from: 0.1; to: 0.6; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="7 9 2"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.4; to: 1; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.5" distance="3" animation="property: light.intensity; from: 0.2; to: 0.8; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-5 11 -3"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.35; to: 0.95; dir: alternate; loop: true; dur: 1900; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.4" distance="2.5" animation="property: light.intensity; from: 0.15; to: 0.7; dir: alternate; loop: true; dur: 1900; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="4 7 -10"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 2100; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.5" distance="3" animation="property: light.intensity; from: 0.2; to: 0.8; dir: alternate; loop: true; dur: 2100; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-7 8 4"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 0.9; dir: alternate; loop: true; dur: 1700; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.35" distance="2.5" animation="property: light.intensity; from: 0.1; to: 0.6; dir: alternate; loop: true; dur: 1700; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="6 13 -4"><a-sphere radius="0.04" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.45; to: 1; dir: alternate; loop: true; dur: 2400; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.6" distance="3.5" animation="property: light.intensity; from: 0.25; to: 0.9; dir: alternate; loop: true; dur: 2400; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-3 9 5"><a-sphere radius="0.02" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.35; to: 0.85; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.3" distance="2" animation="property: light.intensity; from: 0.1; to: 0.6; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="8 11 -6"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 1; dir: alternate; loop: true; dur: 1950; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.4" distance="2.8" animation="property: light.intensity; from: 0.15; to: 0.75; dir: alternate; loop: true; dur: 1950; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-8 7 -3"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.4; to: 0.95; dir: alternate; loop: true; dur: 2300; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.35" distance="2.2" animation="property: light.intensity; from: 0.12; to: 0.65; dir: alternate; loop: true; dur: 2300; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="2 14 -5"><a-sphere radius="0.035" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 1850; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.55" distance="3.2" animation="property: light.intensity; from: 0.22; to: 0.85; dir: alternate; loop: true; dur: 1850; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-2 6 8"><a-sphere radius="0.02" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 0.85; dir: alternate; loop: true; dur: 2150; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.3" distance="2" animation="property: light.intensity; from: 0.1; to: 0.6; dir: alternate; loop: true; dur: 2150; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="9 10 1"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.35; to: 0.9; dir: alternate; loop: true; dur: 1750; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.45" distance="2.7" animation="property: light.intensity; from: 0.18; to: 0.7; dir: alternate; loop: true; dur: 1750; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-9 12 -2"><a-sphere radius="0.028" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.4; to: 1; dir: alternate; loop: true; dur: 2050; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.42" distance="2.6" animation="property: light.intensity; from: 0.16; to: 0.72; dir: alternate; loop: true; dur: 2050; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="1 8 -11"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 0.88; dir: alternate; loop: true; dur: 1650; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.38" distance="2.4" animation="property: light.intensity; from: 0.14; to: 0.68; dir: alternate; loop: true; dur: 1650; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-1 13 7"><a-sphere radius="0.032" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.45; to: 1; dir: alternate; loop: true; dur: 2250; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.5" distance="3" animation="property: light.intensity; from: 0.2; to: 0.8; dir: alternate; loop: true; dur: 2250; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="10 9 -7"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.35; to: 0.92; dir: alternate; loop: true; dur: 1550; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.4" distance="2.5" animation="property: light.intensity; from: 0.15; to: 0.7; dir: alternate; loop: true; dur: 1550; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-10 8 3"><a-sphere radius="0.027" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.4; to: 0.95; dir: alternate; loop: true; dur: 2350; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.37" distance="2.3" animation="property: light.intensity; from: 0.13; to: 0.67; dir: alternate; loop: true; dur: 2350; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="5 15 0"><a-sphere radius="0.035" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 1450; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.6" distance="3.5" animation="property: light.intensity; from: 0.25; to: 0.9; dir: alternate; loop: true; dur: 1450; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-6 14 -8"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.35; to: 0.9; dir: alternate; loop: true; dur: 2450; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.45" distance="2.8" animation="property: light.intensity; from: 0.18; to: 0.75; dir: alternate; loop: true; dur: 2450; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="4 6 9"><a-sphere radius="0.022" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.3; to: 0.82; dir: alternate; loop: true; dur: 1350; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.32" distance="2.1" animation="property: light.intensity; from: 0.11; to: 0.62; dir: alternate; loop: true; dur: 1350; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-4 11 10"><a-sphere radius="0.028" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.42; to: 0.97; dir: alternate; loop: true; dur: 1750; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.43" distance="2.65" animation="property: light.intensity; from: 0.17; to: 0.73; dir: alternate; loop: true; dur: 1750; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="11 7 -1"><a-sphere radius="0.026" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.38; to: 0.93; dir: alternate; loop: true; dur: 2550; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.41" distance="2.55" animation="property: light.intensity; from: 0.16; to: 0.71; dir: alternate; loop: true; dur: 2550; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-11 10 -5"><a-sphere radius="0.031" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.46; to: 1; dir: alternate; loop: true; dur: 1250; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.52" distance="3.1" animation="property: light.intensity; from: 0.21; to: 0.82; dir: alternate; loop: true; dur: 1250; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="3 9 11"><a-sphere radius="0.024" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.33; to: 0.87; dir: alternate; loop: true; dur: 2650; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.36" distance="2.35" animation="property: light.intensity; from: 0.13; to: 0.66; dir: alternate; loop: true; dur: 2650; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-7 6 -9"><a-sphere radius="0.029" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.41; to: 0.96; dir: alternate; loop: true; dur: 1150; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.44" distance="2.7" animation="property: light.intensity; from: 0.17; to: 0.74; dir: alternate; loop: true; dur: 1150; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="8 14 6"><a-sphere radius="0.033" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.48; to: 1; dir: alternate; loop: true; dur: 2750; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.58" distance="3.3" animation="property: light.intensity; from: 0.24; to: 0.88; dir: alternate; loop: true; dur: 2750; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-9 13 8"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.36; to: 0.91; dir: alternate; loop: true; dur: 1050; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.47" distance="2.85" animation="property: light.intensity; from: 0.19; to: 0.77; dir: alternate; loop: true; dur: 1050; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="6 7 -12"><a-sphere radius="0.027" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.39; to: 0.94; dir: alternate; loop: true; dur: 2850; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.4" distance="2.5" animation="property: light.intensity; from: 0.15; to: 0.7; dir: alternate; loop: true; dur: 2850; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-8 9 -11"><a-sphere radius="0.026" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.37; to: 0.92; dir: alternate; loop: true; dur: 950; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.39" distance="2.45" animation="property: light.intensity; from: 0.145; to: 0.69; dir: alternate; loop: true; dur: 950; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="9 12 9"><a-sphere radius="0.034" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.49; to: 1; dir: alternate; loop: true; dur: 1850; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.57" distance="3.25" animation="property: light.intensity; from: 0.23; to: 0.87; dir: alternate; loop: true; dur: 1850; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-10 15 -6"><a-sphere radius="0.032" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.47; to: 0.99; dir: alternate; loop: true; dur: 2950; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.53" distance="3.15" animation="property: light.intensity; from: 0.22; to: 0.83; dir: alternate; loop: true; dur: 2950; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="0 16 -9"><a-sphere radius="0.036" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.51; to: 1; dir: alternate; loop: true; dur: 850; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.62" distance="3.6" animation="property: light.intensity; from: 0.26; to: 0.92; dir: alternate; loop: true; dur: 850; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="7 11 12"><a-sphere radius="0.028" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.4; to: 0.95; dir: alternate; loop: true; dur: 3050; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.43" distance="2.65" animation="property: light.intensity; from: 0.17; to: 0.73; dir: alternate; loop: true; dur: 3050; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-5 7 11"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.34; to: 0.89; dir: alternate; loop: true; dur: 750; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.38" distance="2.4" animation="property: light.intensity; from: 0.14; to: 0.68; dir: alternate; loop: true; dur: 750; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="11 13 -9"><a-sphere radius="0.031" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.45; to: 0.98; dir: alternate; loop: true; dur: 3150; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.51" distance="3.05" animation="property: light.intensity; from: 0.2; to: 0.81; dir: alternate; loop: true; dur: 3150; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-11 14 10"><a-sphere radius="0.033" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.48; to: 1; dir: alternate; loop: true; dur: 650; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.56" distance="3.2" animation="property: light.intensity; from: 0.23; to: 0.86; dir: alternate; loop: true; dur: 650; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="10 6 11"><a-sphere radius="0.029" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.43; to: 0.97; dir: alternate; loop: true; dur: 3250; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.46" distance="2.75" animation="property: light.intensity; from: 0.18; to: 0.76; dir: alternate; loop: true; dur: 3250; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-12 11 -7"><a-sphere radius="0.03" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.44; to: 0.96; dir: alternate; loop: true; dur: 550; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.48" distance="2.9" animation="property: light.intensity; from: 0.19; to: 0.78; dir: alternate; loop: true; dur: 550; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="12 8 -8"><a-sphere radius="0.027" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.38; to: 0.93; dir: alternate; loop: true; dur: 3350; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.42" distance="2.6" animation="property: light.intensity; from: 0.16; to: 0.72; dir: alternate; loop: true; dur: 3350; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="0 6 12"><a-sphere radius="0.025" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.35; to: 0.9; dir: alternate; loop: true; dur: 450; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.37" distance="2.35" animation="property: light.intensity; from: 0.13; to: 0.67; dir: alternate; loop: true; dur: 450; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-1 15 12"><a-sphere radius="0.035" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.5; to: 1; dir: alternate; loop: true; dur: 3450; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.59" distance="3.4" animation="property: light.intensity; from: 0.25; to: 0.89; dir: alternate; loop: true; dur: 3450; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="12 15 4"><a-sphere radius="0.034" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.49; to: 1; dir: alternate; loop: true; dur: 350; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.58" distance="3.3" animation="property: light.intensity; from: 0.24; to: 0.88; dir: alternate; loop: true; dur: 350; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-12 6 9"><a-sphere radius="0.026" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.36; to: 0.91; dir: alternate; loop: true; dur: 3550; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.4" distance="2.5" animation="property: light.intensity; from: 0.15; to: 0.7; dir: alternate; loop: true; dur: 3550; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="2 17 -7"><a-sphere radius="0.037" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.52; to: 1; dir: alternate; loop: true; dur: 250; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.64" distance="3.7" animation="property: light.intensity; from: 0.27; to: 0.94; dir: alternate; loop: true; dur: 250; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="-3 17 -10"><a-sphere radius="0.036" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.51; to: 1; dir: alternate; loop: true; dur: 3650; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.61" distance="3.55" animation="property: light.intensity; from: 0.26; to: 0.91; dir: alternate; loop: true; dur: 3650; easing: easeInOutSine"></a-light></a-entity>
+        <a-entity position="11 16 -11"><a-sphere radius="0.038" material="shader: flat; color: #FFF; emissive: #FFF" animation="property: material.emissiveIntensity; from: 0.53; to: 1; dir: alternate; loop: true; dur: 150; easing: easeInOutSine"></a-sphere><a-light type="point" color="#FFF" intensity="0.65" distance="3.8" animation="property: light.intensity; from: 0.28; to: 0.95; dir: alternate; loop: true; dur: 150; easing: easeInOutSine"></a-light></a-entity>
       </a-entity>
       </a-entity>
 
@@ -166,7 +239,7 @@
         <a-light type="ambient" color="#FFEB99" intensity="1.2"></a-light>
 
         <!-- Renard collé à la surface. -->
-       <a-entity id="fox" gltf-model="./models/Foxv2.glb" position="0 16.20685 0" scale="0.8 0.8 0.8">
+       <a-entity id="fox" gltf-model="./models/Foxv2.glb" position="0 16.20685 0" scale="0.4 0.4 0.4">
         </a-entity>
 
         <!-- Soleil face à la sphère. -->
