@@ -41,6 +41,10 @@ let mainOstSound = null;
 let spaceSFX = null;
 let airplaneSound = null;
 
+// Timers pour transitions automatiques
+let desertAutoTransitionTimer = null;
+let moonAutoTransitionTimer = null;
+
 // Écran de démarrage et initialisation du son
 window.addEventListener("DOMContentLoaded", () => {
   const startButton = document.getElementById("start-button");
@@ -101,6 +105,21 @@ window.addEventListener("DOMContentLoaded", () => {
     // Masquer l'écran de démarrage et afficher la scène
     startScreen.style.display = "none";
     mainScene.style.display = "block";
+
+    // Timer automatique : transition désert → lune après 20 secondes
+    desertAutoTransitionTimer = setTimeout(() => {
+      console.log(
+        "⏰ Transition automatique désert → lune (20 secondes écoulées)",
+      );
+      // Déclencher la transition comme si l'avion était cliqué
+      const airplaneClickEvent = new CustomEvent("model-clicked", {
+        detail: { source: "auto-timer" },
+      });
+      const airplane = document.querySelector("#airplane");
+      if (airplane) {
+        airplane.dispatchEvent(airplaneClickEvent);
+      }
+    }, 20000);
 
     // Corriger les trous dans les modèles GLB (rendu double-face)
     setTimeout(() => {
@@ -421,6 +440,15 @@ window.addEventListener("DOMContentLoaded", () => {
         airplaneClicked = true;
         console.log("✅ Avion cliqué - Téléportation sur la Lune");
 
+        // Annuler le timer automatique désert→lune si interaction manuelle
+        if (desertAutoTransitionTimer) {
+          clearTimeout(desertAutoTransitionTimer);
+          desertAutoTransitionTimer = null;
+          console.log(
+            "⏰ Timer automatique désert→lune annulé (interaction manuelle)",
+          );
+        }
+
         // Arrêter le cycle automatique jour/nuit
         if (dayNightInterval) {
           clearInterval(dayNightInterval);
@@ -562,6 +590,21 @@ window.addEventListener("DOMContentLoaded", () => {
                 airplaneSound.currentTime = 0;
               }
               console.log("✈️ Son de l'avion arrêté");
+
+              // Timer automatique : transition lune → fleurs 5 secondes après disparition avion
+              moonAutoTransitionTimer = setTimeout(() => {
+                console.log(
+                  "⏰ Transition automatique lune → fleurs (5 secondes après avion)",
+                );
+                // Déclencher la transition comme si la rose était cliquée
+                const roseClickEvent = new CustomEvent("model-clicked", {
+                  detail: { source: "auto-timer" },
+                });
+                const rose = document.querySelector("#rose");
+                if (rose) {
+                  rose.dispatchEvent(roseClickEvent);
+                }
+              }, 5000);
             }, 20000);
 
             // Activer l'interaction avec la rose quand l'avion sort du ciel
@@ -643,6 +686,15 @@ window.addEventListener("DOMContentLoaded", () => {
           return;
         }
         console.log("✅ Rose cliquée - Transition vers le Champ de fleurs");
+
+        // Annuler le timer automatique lune→fleurs si interaction manuelle
+        if (moonAutoTransitionTimer) {
+          clearTimeout(moonAutoTransitionTimer);
+          moonAutoTransitionTimer = null;
+          console.log(
+            "⏰ Timer automatique lune→fleurs annulé (interaction manuelle)",
+          );
+        }
 
         // Arrêter SpaceSFX et lancer FlowerOST.mp3
         if (spaceSFX) {
