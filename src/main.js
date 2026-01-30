@@ -118,6 +118,32 @@ window.addEventListener("DOMContentLoaded", () => {
         });
       }
     }, 2000);
+
+    // Interaction avec le renard (cooldown de 3 secondes)
+    let foxCooldown = false;
+    const fox = document.querySelector("#fox");
+    if (fox) {
+      fox.addEventListener("model-clicked", () => {
+        if (!foxCooldown) {
+          // Jouer le son du renard en parallèle de la musique
+          const foxSound = new Audio("./Foxsfx.mp3");
+          foxSound.volume = 0.6; // Volume légèrement réduit pour ne pas couvrir la musique
+          foxSound.play();
+          console.log("🦊 Son du renard joué");
+
+          // Activer le cooldown
+          foxCooldown = true;
+          setTimeout(() => {
+            foxCooldown = false;
+            console.log("✅ Renard prêt à être cliqué à nouveau");
+          }, 3000);
+        } else {
+          console.log(
+            "⏳ Cooldown actif - attendez avant de cliquer sur le renard",
+          );
+        }
+      });
+    }
   });
 });
 
@@ -235,13 +261,9 @@ function startSunsetAnimation() {
   const sun = document.querySelector("#sun");
   const dome = document.querySelector("#dome");
 
-  // Couleurs de départ et d'arrivée - transition douce nuit vers aube
+  // Couleurs de départ et d'arrivée - transition simplifiée (3 étapes au lieu de 7 pour meilleures performances)
   const startSkyColor = "#1C1C3C"; // Bleu nuit
-  const color1 = "#2A3A52"; // Bleu gris nuit
-  const color2 = "#4A5A6A"; // Gris bleué
-  const color3 = "#8A7A6A"; // Gris chaud
-  const color4 = "#C8A882"; // Beige orangé
-  const color5 = "#FFB870"; // Jaune doux
+  const midColor = "#7A6A72"; // Gris violet (mélange des couleurs intermédiaires)
   const endSkyColor = "#FF8C42"; // Orange doré (golden hour)
   const startSunIntensity = 1;
   const endSunIntensity = 0.7;
@@ -265,36 +287,24 @@ function startSunsetAnimation() {
       startSunIntensity + (endSunIntensity - startSunIntensity) * eased;
     sun.setAttribute("light", "intensity", currentIntensity);
 
-    // Interpolation fluide de la couleur du ciel - transition nuit vers aube dorée
+    // Interpolation simplifiée de la couleur du ciel - 3 étapes (optimisé)
     let currentColor;
-    if (eased < 0.17) {
-      // Bleu nuit -> Bleu gris
-      currentColor = interpolateColor(startSkyColor, color1, eased / 0.17);
-    } else if (eased < 0.33) {
-      // Bleu gris -> Gris bleué
-      currentColor = interpolateColor(color1, color2, (eased - 0.17) / 0.16);
-    } else if (eased < 0.5) {
-      // Gris bleué -> Gris chaud
-      currentColor = interpolateColor(color2, color3, (eased - 0.33) / 0.17);
-    } else if (eased < 0.67) {
-      // Gris chaud -> Beige orangé
-      currentColor = interpolateColor(color3, color4, (eased - 0.5) / 0.17);
-    } else if (eased < 0.83) {
-      // Beige orangé -> Jaune doux
-      currentColor = interpolateColor(color4, color5, (eased - 0.67) / 0.16);
+    if (eased < 0.5) {
+      // Bleu nuit -> Gris violet
+      currentColor = interpolateColor(startSkyColor, midColor, eased / 0.5);
     } else {
-      // Jaune doux -> Orange doré
+      // Gris violet -> Orange doré
       currentColor = interpolateColor(
-        color5,
+        midColor,
         endSkyColor,
-        (eased - 0.83) / 0.17,
+        (eased - 0.5) / 0.5,
       );
     }
 
     dome.setAttribute("color", currentColor);
 
     if (progress >= 1) {
-      clearInterval(animationInterval);
+      clearInterval(animationInterval); // Arrêter l'animation principale
       sunsetComplete = true;
       console.log("Coucher de soleil terminé - Golden hour atteinte");
       dome.setAttribute("color", endSkyColor);
@@ -332,13 +342,13 @@ function startSunsetAnimation() {
                 if (progress >= 1) {
                   clearInterval(fadeOutInterval);
                 }
-              }, 16);
+              }, 50); // Réduit à ~20fps
             }, 3000);
           }
-        }, 16);
+        }, 50); // Réduit à ~20fps
       }
     }
-  }, 16); // ~60fps pour transition très fluide
+  }, 33); // ~30fps pour réduire la charge (au lieu de 60fps)
 }
 
 // Gestion des transitions entre mondes
@@ -440,7 +450,6 @@ window.addEventListener("DOMContentLoaded", () => {
           const starCount = stars.length;
           const songDuration = 27000; // Durée de StarsSong en ms (27 secondes)
           const totalAppearanceDuration = 35000; // Les étoiles continuent d'apparaître après la musique (35 secondes)
-          const delayBetweenStars = totalAppearanceDuration / starCount;
 
           console.log(
             `⭐ ${starCount} étoiles vont apparaître progressivement sur ${totalAppearanceDuration / 1000}s`,
@@ -454,15 +463,31 @@ window.addEventListener("DOMContentLoaded", () => {
             if (light) light.setAttribute("visible", false);
           });
 
-          // Faire apparaître les étoiles une par une
-          stars.forEach((star, index) => {
-            setTimeout(() => {
+          // Faire apparaître les étoiles progressivement avec un seul intervalle (optimisé)
+          let currentStarIndex = 0;
+          const starsPerUpdate = 2; // Apparaître 2 étoiles à la fois pour fluidité
+          const updateInterval =
+            (totalAppearanceDuration / starCount) * starsPerUpdate;
+
+          const starInterval = setInterval(() => {
+            for (
+              let i = 0;
+              i < starsPerUpdate && currentStarIndex < starCount;
+              i++
+            ) {
+              const star = stars[currentStarIndex];
               const sphere = star.querySelector("a-sphere");
               const light = star.querySelector("a-light[type='point']");
               if (sphere) sphere.setAttribute("visible", true);
               if (light) light.setAttribute("visible", true);
-            }, delayBetweenStars * index);
-          });
+              currentStarIndex++;
+            }
+
+            if (currentStarIndex >= starCount) {
+              clearInterval(starInterval);
+              console.log("✅ Toutes les étoiles sont apparues");
+            }
+          }, updateInterval);
         }
 
         // Lancer l'animation du coucher de soleil (golden hour)
