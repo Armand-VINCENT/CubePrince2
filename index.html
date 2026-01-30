@@ -109,8 +109,18 @@
           gltf-model="./models/Airplane.glb"
           position="0 0.5 -3"
           scale="1 1 1"
-          class="clickable"
         >
+          <!-- Boîte de collision invisible pour capturer les clics (Web + VR) -->
+          <a-box
+            id="airplane-hitbox"
+            class="clickable"
+            position="0 0.3 0"
+            scale="2.5 1.5 4"
+            opacity="0"
+            visible="true"
+            material="transparent: true; opacity: 0; side: double"
+            cursor-listener
+          ></a-box>
         </a-entity>
 
         <!-- Lune dans le ciel -->
@@ -120,6 +130,15 @@
           position="8 15 -10"
           scale="2 2 2"
         ></a-entity>
+
+        <!-- Nuages dans le ciel du désert -->
+        <a-entity gltf-model="./models/Clouds.glb" position="-5 8 -8" scale="0.3 0.3 0.3" animation="property: position; to: 10 8 -8; loop: true; dur: 60000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds2.glb" position="12 10 5" scale="0.4 0.4 0.4" animation="property: position; to: -8 10 5; loop: true; dur: 80000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds3.glb" position="-10 12 -3" scale="0.35 0.35 0.35" animation="property: position; to: 12 12 -3; loop: true; dur: 70000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds.glb" position="6 9 10" scale="0.25 0.25 0.25" animation="property: position; to: -12 9 10; loop: true; dur: 65000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds2.glb" position="-8 11 8" scale="0.3 0.3 0.3" animation="property: position; to: 10 11 8; loop: true; dur: 75000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds3.glb" position="3 7 -12" scale="0.4 0.4 0.4" animation="property: position; to: -10 7 -12; loop: true; dur: 85000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds.glb" position="10 13 -6" scale="0.35 0.35 0.35" animation="property: position; to: -8 13 -6; loop: true; dur: 72000; easing: linear"></a-entity>
       </a-entity>
 
       <!-- MONDE 2: SURFACE DE LA LUNE -->
@@ -131,6 +150,7 @@
           color="#A0A0A0"
           segments-height="18"
           segments-width="36"
+          material="src: ./textures/MoonTextureCartoon.jpg; repeat: 4 4"
         ></a-sphere>
 
         <!-- Lumières sur la Lune -->
@@ -143,14 +163,44 @@
         ></a-light>
         <a-light type="ambient" color="#8899BB" intensity="1"></a-light>
 
+        <!-- Avion qui passe dans le ciel après 50 secondes -->
+        <a-entity 
+          id="flying-airplane" 
+          gltf-model="./models/Airplane.glb" 
+          position="20 10 0" 
+          scale="1.5 1.5 1.5"
+          rotation="0 180 0"
+          visible="false"
+        >
+          <!-- Lumière clignotante sur l'avion -->
+          <a-light 
+            id="airplane-blink-light"
+            type="point" 
+            color="#FF0000" 
+            intensity="2" 
+            distance="8"
+            position="0 0 0"
+          ></a-light>
+        </a-entity>
+
         <!-- Rose collée sur la surface de la sphère -->
         <a-entity
           id="rose"
           gltf-model="./models/Rose.glb"
           position="0 5.3 0"
           scale="0.8 0.8 0.8"
-          class="clickable"
         >
+          <!-- Boîte de collision invisible pour la rose (Web + VR) -->
+          <a-box
+            id="rose-hitbox"
+            class="clickable"
+            position="0 0 0"
+            scale="1 1.5 1"
+            opacity="0"
+            visible="true"
+            material="transparent: true; opacity: 0; side: double"
+            cursor-listener
+          ></a-box>
         </a-entity>
 
         <!-- Texte poétique -->
@@ -226,6 +276,7 @@
           color="#7CFC00"
           segments-height="24"
           segments-width="48"
+         material="src: ./textures/EarthTexture.jpg; repeat: 4 4"
         ></a-sphere>
 
         <!-- Lumières sur la sphère -->
@@ -239,8 +290,37 @@
         <a-light type="ambient" color="#FFEB99" intensity="1.2"></a-light>
 
         <!-- Renard collé à la surface. -->
-       <a-entity id="fox" gltf-model="./models/Foxv2.glb" position="0 16.20685 0" scale="0.4 0.4 0.4">
+       <a-entity id="fox" gltf-model="./models/Foxv2.glb" position="0 15.57379 0" scale="0.4 0.4 0.4">
         </a-entity>
+
+        <!-- Écharpe collée à la surface -->
+      <a-entity 
+        id="scarf" 
+        gltf-model="./models/scarf.glb" 
+        position="-0.7678 8.79016 5.91201" 
+        scale="10 10 10" 
+        rotation="0 45 0"
+        animation="property: rotation; to: 0 405 0; loop: true; dur: 10000; easing: linear"
+      >
+        </a-entity>
+
+        <!-- Texte HERMES derrière l'écharpe -->
+        <a-text
+          value="HERMES x Le petit prince"
+          position="-0.7678 16.665 6.5"
+          align="center"
+          color="#8B4513"
+          width="4"
+          rotation="0 180 0"
+        ></a-text>
+
+        <!-- Ballons animés -->
+        <a-entity 
+          id="balloons" 
+          gltf-model="./models/Balloons.glb" 
+          position="5 18 -8" 
+          scale="0.8 0.8 0.8"
+        ></a-entity>
 
         <!-- Soleil face à la sphère. -->
        <a-entity id="sun-entity" position="0.19208 4.36791 -14.48412">
@@ -248,6 +328,7 @@
            gltf-model="./models/Sun.glb" 
            scale="0.1 0.1 0.1" 
            rotation="0 90 0"
+           material="emissive: #FFFF00; emissiveIntensity: 1"
          ></a-entity>
          
          <!-- Lumière émissive du soleil -->
@@ -264,6 +345,18 @@
            material="shader: flat; color: #FFD700; opacity: 0.4; transparent: true"
          ></a-sphere>
        </a-entity>
+
+        <!-- Nuages dans le ciel du champ de fleurs -->
+        <a-entity gltf-model="./models/Clouds2.glb" position="-8 18 -12" scale="0.5 0.5 0.5" animation="property: position; to: 15 18 -12; loop: true; dur: 90000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds.glb" position="14 20 8" scale="0.6 0.6 0.6" animation="property: position; to: -12 20 8; loop: true; dur: 100000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds3.glb" position="-12 22 5" scale="0.45 0.45 0.45" animation="property: position; to: 14 22 5; loop: true; dur: 95000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds2.glb" position="8 19 -10" scale="0.55 0.55 0.55" animation="property: position; to: -15 19 -10; loop: true; dur: 85000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds.glb" position="-10 21 12" scale="0.5 0.5 0.5" animation="property: position; to: 12 21 12; loop: true; dur: 110000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds3.glb" position="5 17 -8" scale="0.4 0.4 0.4" animation="property: position; to: -13 17 -8; loop: true; dur: 92000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds.glb" position="12 23 -5" scale="0.6 0.6 0.6" animation="property: position; to: -10 23 -5; loop: true; dur: 105000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds2.glb" position="-6 18 10" scale="0.45 0.45 0.45" animation="property: position; to: 14 18 10; loop: true; dur: 88000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds3.glb" position="10 20 -15" scale="0.5 0.5 0.5" animation="property: position; to: -12 20 -15; loop: true; dur: 98000; easing: linear"></a-entity>
+        <a-entity gltf-model="./models/Clouds.glb" position="-14 19 -7" scale="0.55 0.55 0.55" animation="property: position; to: 10 19 -7; loop: true; dur: 102000; easing: linear"></a-entity>
       </a-entity>
 
       <!-- Curseur pour l'interaction -->

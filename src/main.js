@@ -1,9 +1,44 @@
 import "aframe";
 import "./style.css";
 
+// Composant personnalisé pour gérer les clics sur les modèles 3D (Web + VR)
+AFRAME.registerComponent("cursor-listener", {
+  init: function () {
+    const element = this.el;
+    let isProcessing = false;
+
+    // Fonction commune pour tous les types de clics avec debounce
+    const handleInteraction = (eventType) => {
+      if (isProcessing) return; // Éviter les clics multiples
+      isProcessing = true;
+
+      console.log(`🎮 Interaction détectée via: ${eventType}`);
+      element.emit("model-clicked", { source: eventType });
+
+      // Réinitialiser après un court délai
+      setTimeout(() => {
+        isProcessing = false;
+      }, 100);
+    };
+
+    // Événement principal pour Web (souris)
+    element.addEventListener("click", () => handleInteraction("click"));
+
+    // Événement principal pour VR (contrôleurs)
+    element.addEventListener("triggerdown", () =>
+      handleInteraction("triggerdown"),
+    );
+
+    console.log(
+      `✨ Composant cursor-listener initialisé sur ${element.id || element.className}`,
+    );
+  },
+});
+
 // Gestion des sons
 let windSound = null;
 let mainOstSound = null;
+let spaceSFX = null;
 
 // Écran de démarrage et initialisation du son
 window.addEventListener("DOMContentLoaded", () => {
@@ -19,9 +54,48 @@ window.addEventListener("DOMContentLoaded", () => {
     windSound.play();
 
     // Précharger le son principal
-    mainOstSound = new Audio("./MainOst.m4a");
-    mainOstSound.loop = true;
+    mainOstSound = new Audio("./StarsSong.m4a");
+    mainOstSound.loop = false;
     mainOstSound.volume = 0.6;
+
+    // Lancer SpaceSFX.mp3 quand StarsSong.m4a se termine
+    mainOstSound.addEventListener("ended", () => {
+      console.log("🎵 StarsSong terminé - Lancement de SpaceSFX");
+      spaceSFX = new Audio("./SpaceSFX.mp3");
+      spaceSFX.loop = true;
+      spaceSFX.volume = 0.5;
+      spaceSFX.play();
+
+      // Transition du ciel vers le noir
+      const dome = document.querySelector("#dome");
+      const sun = document.querySelector("#sun");
+      if (dome) {
+        console.log("🌌 Transition du ciel vers le noir");
+        smoothColorTransition(dome, "#000000", 0.1, 8000); // 8 secondes vers le noir
+
+        // Réduire l'intensité du soleil progressivement
+        if (sun) {
+          let startTime = Date.now();
+          let duration = 8000;
+          let startIntensity =
+            parseFloat(sun.getAttribute("light").intensity) || 0.7;
+          let targetIntensity = 0.1;
+
+          const lightInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased =
+              progress < 0.5
+                ? 2 * progress * progress
+                : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            const intensity =
+              startIntensity + (targetIntensity - startIntensity) * eased;
+            sun.setAttribute("light", "intensity", intensity);
+            if (progress >= 1) clearInterval(lightInterval);
+          }, 16);
+        }
+      }
+    });
 
     // Masquer l'écran de démarrage et afficher la scène
     startScreen.style.display = "none";
@@ -155,6 +229,7 @@ let dayNightInterval = setInterval(toggleDayNight, 30000);
 
 // Animation du coucher de soleil (golden hour)
 let sunsetComplete = false;
+let airplaneComplete = false;
 
 function startSunsetAnimation() {
   const sun = document.querySelector("#sun");
@@ -225,7 +300,7 @@ function startSunsetAnimation() {
       dome.setAttribute("color", endSkyColor);
 
       // Jouer le son SFX_Activation
-      const activationSound = new Audio("./SFX_Activation.mp3");
+      const activationSound = new Audio("./Magical_SFX.m4a");
       activationSound.play();
 
       // Afficher et animer le texte poétique
@@ -290,7 +365,21 @@ function switchWorld(worldNumber) {
       // Téléporter au sommet de la sphère (rayon 15 + hauteur caméra)
       const cameraRig = document.querySelector("#camera-rig");
       cameraRig.setAttribute("position", "0 15.3 0");
-      dome.setAttribute("color", "#87CEEB"); // Ambiance champ
+      dome.setAttribute("color", "#4979a7"); // Ambiance champ
+
+      // Démarrer l'animation des ballons
+      const balloons = document.querySelector("#balloons");
+      if (balloons) {
+        // Animation vers la gauche sans boucle
+        balloons.setAttribute("animation", {
+          property: "position",
+          to: "-20 18 -8",
+          dur: 30000,
+          easing: "linear",
+          loop: false,
+        });
+        console.log("🎈 Ballons animés dans le monde Fleurs");
+      }
       break;
   }
 
@@ -308,10 +397,18 @@ window.addEventListener("DOMContentLoaded", () => {
     let airplaneClicked = false;
 
     if (airplane) {
-      airplane.addEventListener("click", () => {
-        if (airplaneClicked) return; // Éviter les clics multiples
+      console.log("✈️ Avion détecté dans la scène");
+
+      // Écouter à la fois les événements click et model-clicked
+      const handleAirplaneClick = (event) => {
+        const eventType = event?.type || event?.detail?.source || "inconnu";
+        console.log(`🖱️ CLIC DÉTECTÉ SUR L'AVION! (Type: ${eventType})`);
+        if (airplaneClicked) {
+          console.log("⚠️ Avion déjà cliqué - Événement ignoré");
+          return; // Éviter les clics multiples
+        }
         airplaneClicked = true;
-        console.log("Avion cliqué - Téléportation sur la Lune");
+        console.log("✅ Avion cliqué - Téléportation sur la Lune");
 
         // Arrêter le cycle automatique jour/nuit
         if (dayNightInterval) {
@@ -335,25 +432,163 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         if (mainOstSound) {
           mainOstSound.play();
+
+          // Faire apparaître les étoiles progressivement pendant StarsSong
+          const stars = document.querySelectorAll(
+            "#moon-world a-entity[position]",
+          );
+          const starCount = stars.length;
+          const songDuration = 27000; // Durée de StarsSong en ms (27 secondes)
+          const totalAppearanceDuration = 35000; // Les étoiles continuent d'apparaître après la musique (35 secondes)
+          const delayBetweenStars = totalAppearanceDuration / starCount;
+
+          console.log(
+            `⭐ ${starCount} étoiles vont apparaître progressivement sur ${totalAppearanceDuration / 1000}s`,
+          );
+
+          // Cacher toutes les étoiles au début
+          stars.forEach((star) => {
+            const sphere = star.querySelector("a-sphere");
+            const light = star.querySelector("a-light[type='point']");
+            if (sphere) sphere.setAttribute("visible", false);
+            if (light) light.setAttribute("visible", false);
+          });
+
+          // Faire apparaître les étoiles une par une
+          stars.forEach((star, index) => {
+            setTimeout(() => {
+              const sphere = star.querySelector("a-sphere");
+              const light = star.querySelector("a-light[type='point']");
+              if (sphere) sphere.setAttribute("visible", true);
+              if (light) light.setAttribute("visible", true);
+            }, delayBetweenStars * index);
+          });
         }
 
         // Lancer l'animation du coucher de soleil (golden hour)
         // Le dôme sera géré par l'animation golden hour
         startSunsetAnimation();
-      });
+
+        // Faire passer l'avion dans le ciel après 50 secondes
+        setTimeout(() => {
+          const flyingAirplane = document.querySelector("#flying-airplane");
+          const blinkLight = document.querySelector("#airplane-blink-light");
+
+          if (flyingAirplane) {
+            console.log("✈️ Avion volant apparaît dans le ciel");
+
+            // Rendre l'avion visible
+            flyingAirplane.setAttribute("visible", true);
+
+            // Animation de traversée du ciel (plus loin)
+            flyingAirplane.setAttribute("animation", {
+              property: "position",
+              to: "-35 10 0",
+              dur: 20000,
+              easing: "linear",
+            });
+
+            // Activer l'interaction avec la rose quand l'avion sort du ciel
+            setTimeout(() => {
+              airplaneComplete = true;
+              console.log("✅ Avion sorti du ciel - Rose activable");
+
+              // Afficher le texte "La rose..."
+              const roseText = document.querySelector("#rose-text");
+              if (roseText) {
+                // Apparition progressive
+                let textOpacity = 0;
+                const fadeInDuration = 2000;
+                const fadeInStart = Date.now();
+
+                const fadeInInterval = setInterval(() => {
+                  const elapsed = Date.now() - fadeInStart;
+                  textOpacity = Math.min(elapsed / fadeInDuration, 1);
+                  roseText.setAttribute("opacity", textOpacity);
+
+                  if (textOpacity >= 1) {
+                    clearInterval(fadeInInterval);
+
+                    // Disparition après 3 secondes
+                    setTimeout(() => {
+                      const fadeOutDuration = 2000;
+                      const fadeOutStart = Date.now();
+
+                      const fadeOutInterval = setInterval(() => {
+                        const elapsed = Date.now() - fadeOutStart;
+                        const progress = Math.min(elapsed / fadeOutDuration, 1);
+                        roseText.setAttribute("opacity", 1 - progress);
+
+                        if (progress >= 1) {
+                          clearInterval(fadeOutInterval);
+                        }
+                      }, 16);
+                    }, 3000);
+                  }
+                }, 16);
+              }
+            }, 20000);
+
+            // Animation de la lumière clignotante
+            if (blinkLight) {
+              blinkLight.setAttribute("animation", {
+                property: "light.intensity",
+                from: 0,
+                to: 3,
+                dir: "alternate",
+                loop: true,
+                dur: 500,
+                easing: "linear",
+              });
+            }
+          }
+        }, 50000); // 50 secondes
+      };
+
+      // Utiliser uniquement l'événement personnalisé émis par cursor-listener
+      airplane.addEventListener("model-clicked", handleAirplaneClick);
+
+      console.log("🎯 Événement de clic enregistré sur l'avion (Web + VR)");
+    } else {
+      console.error("❌ Avion non trouvé dans la scène!");
     }
 
     // Interaction avec la rose -> Champ de fleurs
     const rose = document.querySelector("#rose");
     if (rose) {
-      rose.addEventListener("click", () => {
-        if (!sunsetComplete) {
-          console.log("Attendez la fin du coucher de soleil...");
+      console.log("🌹 Rose détectée dans la scène");
+
+      const handleRoseClick = (event) => {
+        const eventType = event?.type || event?.detail?.source || "inconnu";
+        console.log(`🖱️ CLIC DÉTECTÉ SUR LA ROSE! (Type: ${eventType})`);
+
+        if (!airplaneComplete) {
+          console.log("⏳ Attendez que l'avion sorte du ciel...");
           return;
         }
-        console.log("Rose cliquée - Transition vers le Champ de fleurs");
+        console.log("✅ Rose cliquée - Transition vers le Champ de fleurs");
+
+        // Arrêter SpaceSFX et lancer FlowerOST.mp3
+        if (spaceSFX) {
+          spaceSFX.pause();
+          spaceSFX.currentTime = 0;
+        }
+
+        const flowerOST = new Audio("./FlowerOST.mp3");
+        flowerOST.loop = true;
+        flowerOST.volume = 0.6;
+        flowerOST.play();
+        console.log("🎵 Musique changée pour FlowerOST.mp3");
+
         switchWorld(3);
-      });
+      };
+
+      // Utiliser uniquement l'événement personnalisé émis par cursor-listener
+      rose.addEventListener("model-clicked", handleRoseClick);
+
+      console.log("🎯 Événement de clic enregistré sur la rose (Web + VR)");
+    } else {
+      console.error("❌ Rose non trouvée dans la scène!");
     }
   }, 1000);
 });
