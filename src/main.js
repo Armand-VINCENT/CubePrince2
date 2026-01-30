@@ -39,6 +39,7 @@ AFRAME.registerComponent("cursor-listener", {
 let windSound = null;
 let mainOstSound = null;
 let spaceSFX = null;
+let airplaneSound = null;
 
 // Écran de démarrage et initialisation du son
 window.addEventListener("DOMContentLoaded", () => {
@@ -121,13 +122,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Interaction avec le renard (cooldown de 3 secondes)
     let foxCooldown = false;
-    const fox = document.querySelector("#fox");
-    if (fox) {
-      fox.addEventListener("model-clicked", () => {
+    const foxHitbox = document.querySelector("#fox .clickable");
+    if (foxHitbox) {
+      foxHitbox.addEventListener("click", () => {
         if (!foxCooldown) {
           // Jouer le son du renard en parallèle de la musique
           const foxSound = new Audio("./Foxsfx.mp3");
-          foxSound.volume = 0.6; // Volume légèrement réduit pour ne pas couvrir la musique
+          foxSound.volume = 1; // Volume légèrement réduit pour ne pas couvrir la musique
           foxSound.play();
           console.log("🦊 Son du renard joué");
 
@@ -512,6 +513,56 @@ window.addEventListener("DOMContentLoaded", () => {
               dur: 20000,
               easing: "linear",
             });
+
+            // Jouer le son de l'avion avec volume dynamique basé sur la distance
+            airplaneSound = new Audio("./SFXAirplane.m4a");
+            airplaneSound.loop = true;
+            airplaneSound.volume = 0.3; // Volume initial
+            airplaneSound.play();
+
+            // Mettre à jour le volume en fonction de la distance par rapport à la rose
+            const rose = document.querySelector("#rose");
+            const rosePosition = rose.getAttribute("position");
+
+            const updateAirplaneVolume = setInterval(() => {
+              const airplanePosition = flyingAirplane.getAttribute("position");
+
+              // Calculer la distance entre l'avion et la rose
+              const dx = airplanePosition.x - rosePosition.x;
+              const dy = airplanePosition.y - rosePosition.y;
+              const dz = airplanePosition.z - rosePosition.z;
+              const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+              // Volume inversement proportionnel à la distance (plus proche = plus fort)
+              // Distance minimale ~4.7 unités (au plus proche), maximale ~35 unités (limites du ciel)
+              const minDistance = 4.7;
+              const maxDistance = 35;
+              const normalizedDistance = Math.min(
+                Math.max(distance, minDistance),
+                maxDistance,
+              );
+              const volume =
+                1 -
+                (normalizedDistance - minDistance) /
+                  (maxDistance - minDistance);
+
+              // Appliquer le volume (entre 0.2 et 1)
+              airplaneSound.volume = 0.2 + volume * 0.8;
+
+              console.log(
+                `✈️ Distance: ${distance.toFixed(1)}, Volume: ${airplaneSound.volume.toFixed(2)}`,
+              );
+            }, 100); // Mise à jour toutes les 100ms
+
+            // Arrêter le son et les mises à jour après l'animation (20 secondes)
+            setTimeout(() => {
+              clearInterval(updateAirplaneVolume);
+              if (airplaneSound) {
+                airplaneSound.pause();
+                airplaneSound.currentTime = 0;
+              }
+              console.log("✈️ Son de l'avion arrêté");
+            }, 20000);
 
             // Activer l'interaction avec la rose quand l'avion sort du ciel
             setTimeout(() => {
